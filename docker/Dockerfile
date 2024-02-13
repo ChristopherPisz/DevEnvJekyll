@@ -1,22 +1,23 @@
 # To build the docker image:
-# docker build -t devenvcpp/ubuntu:0.1 .
+# docker build -t devenvjekyll/ubuntu:0.1 .
 #
 # To create the docker container and open the terminal
 # This will create a volume for us to persist our files. We can mount this volume in other containers later if we like.
 #   The volume differs from mounting a directory from the host OS, in that docker will manage it and we won't access it from the host. 
 #   That way we don't have to worry about line endings and such.
-# docker run --name devenvcpp --user developer -it --mount type=volume,src=vol_devenvcpp,dst=/home/developer/volume devenvcpp/ubuntu:0.1 bash
+# docker run --name devenvjekyll --user developer -it --mount type=volume,src=vol_devenvjekyll,dst=/home/developer/volume devenvjekyll/ubuntu:0.1 bash
 # 
 # When done, just 'exit'
 # 
 # To start the already created docker container and open the terminal
-# docker start --attach --interactive devenvcpp
+# docker start --attach --interactive devenvjekyll
 #
 # When done, just 'exit'
 
 FROM ubuntu:22.04
+SHELL ["/bin/bash", "-c"]
 MAINTAINER ChristopherPisz
-LABEL Description="Chris' Ubuntu based development environment for C++"
+LABEL Description="Chris' Ubuntu based development environment for Jekyll"
 
 ARG USERNAME=developer
 ARG USER_UID=1000
@@ -31,17 +32,10 @@ RUN apt update && apt -y --no-install-recommends install \
 	   vim \
        git \
 	   ssh \
-       build-essential \
-       clang \
-       cmake \
-	   ninja-build \
-       gdb \
        wget \
-	   python3 \
-	   python3-pip
-
-# Package manager for C++ is what everyone needs in thier life
-RUN pip install conan
+	   build-essential \
+	   ruby-full \
+	   zlib1g-dev
 
 # Create a non-root user and give them sudo
 RUN groupadd --gid $USER_GID $USERNAME && \
@@ -49,8 +43,21 @@ RUN groupadd --gid $USER_GID $USERNAME && \
 	echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME && \
     chmod 0440 /etc/sudoers.d/$USERNAME
 
+# Change to the user
 USER $USERNAME
 WORKDIR /home/$USERNAME
 
-# Make the directory we will map the volume to, as the user, so it has proper permissions
+# As the user, make the directory we will map the volume to, as the user, so it has proper permissions
 RUN mkdir -p /home/$USERNAME/volume
+
+# As the user, create gem environment variables for the installation directory and create that directory
+ENV GEM_HOME="/home/$USERNAME/gems"
+ENV PATH="/home/$USERNAME/gems/bin:$PATH"
+
+RUN mkdir -p /home/$USERNAME/gems/bin && \
+    echo 'export GEM_HOME="/home/$USERNAME/gems"' >> ~/.bashrc && \
+	echo 'export PATH="/home/$USERNAME/gems/bin:$PATH"' >> ~/.bashrc
+
+# Install the bundler
+RUN	gem install jekyll bundler
+
