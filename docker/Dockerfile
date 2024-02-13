@@ -5,7 +5,8 @@
 # This will create a volume for us to persist our files. We can mount this volume in other containers later if we like.
 #   The volume differs from mounting a directory from the host OS, in that docker will manage it and we won't access it from the host. 
 #   That way we don't have to worry about line endings and such.
-# docker run --name devenvjekyll --user developer -it --mount type=volume,src=vol_devenvjekyll,dst=/home/developer/volume devenvjekyll/ubuntu:0.1 bash
+# I am also going to forward the container port 4000 to host port 4000, for when we serve the webpage in development
+# docker run --name devenvjekyll --user developer -it -p 4000:4000 --mount type=volume,src=vol_devenvjekyll,dst=/home/developer/volume devenvjekyll/ubuntu:0.1 bash
 # 
 # When done, just 'exit'
 # 
@@ -55,8 +56,8 @@ ENV GEM_HOME="/home/$USERNAME/gems"
 ENV PATH="/home/$USERNAME/gems/bin:$PATH"
 
 RUN mkdir -p /home/$USERNAME/gems/bin && \
-    echo 'export GEM_HOME="/home/$USERNAME/gems"' >> ~/.bashrc && \
-	echo 'export PATH="/home/$USERNAME/gems/bin:$PATH"' >> ~/.bashrc
+    echo "export GEM_HOME=/home/$USERNAME/gems" >> ~/.bashrc && \
+	echo "export PATH=/home/$USERNAME/gems/bin:$PATH" >> ~/.bashrc
 
 # Install the bundler
 RUN	gem install jekyll bundler
