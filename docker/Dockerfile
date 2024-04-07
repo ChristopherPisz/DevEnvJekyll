@@ -59,6 +59,7 @@ RUN mkdir -p /home/$USERNAME/gems/bin && \
     echo "export GEM_HOME=/home/$USERNAME/gems" >> ~/.bashrc && \
 	echo "export PATH=/home/$USERNAME/gems/bin:$PATH" >> ~/.bashrc
 
-# Install the bundler
-RUN	gem install jekyll bundler
+# Install the need ruby gems
+RUN	gem install jekyll bundler && \
+    bundle add webrick
 
