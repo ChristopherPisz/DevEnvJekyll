@@ -14,6 +14,10 @@
 # docker start --attach --interactive devenvjekyll
 #
 # When done, just 'exit'
+#
+# Important - You must bind the host 0.0.0.0 when starting the jekyll server in order to access it from your host machine
+# In container - bundle exec jekyll serve --host 0.0.0.0
+# In host machine browser - http://localhost:4000
 
 FROM ubuntu:22.04
 SHELL ["/bin/bash", "-c"]
